@@ -30,4 +30,3 @@ Premier album : Panini Coupe du monde 2026.
 - docs : décisions et documentation
 
 Les décisions de projet sont dans docs/decisions.md.
-
