@@ -3,6 +3,13 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
+import {
+  emailVerification,
+  envoiEmailConfigure,
+  envoyerEmail,
+} from "@/email/envoyer";
+
+const verificationEmail = envoiEmailConfigure();
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -76,6 +83,16 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 10,
+    requireEmailVerification: verificationEmail,
   },
+  emailVerification: verificationEmail
+    ? {
+        sendOnSignUp: true,
+        autoSignInAfterVerification: false,
+        sendVerificationEmail: async ({ user, url }) => {
+          await envoyerEmail({ a: user.email, ...emailVerification(url) });
+        },
+      }
+    : undefined,
   plugins: [nextCookies()], // doit rester en dernier
 });

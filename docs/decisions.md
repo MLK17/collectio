@@ -62,23 +62,22 @@ Dernière mise à jour : 2026-11-01 (état des lieux du dépôt au commit `b7a56
 ## 5. Méthode de travail
 
 - Avancer par phases ; proposer avant d'implémenter ; aucun ajout hors périmètre sans accord.
-- Une branche par phase à partir de la Phase 2, fusion vers `main` après CI verte et relecture du diff. Les phases 0 et 1 sont réalisées directement sur `main`.
-- Terminer la Phase 1 avant de reprendre la Phase 2.
+- Une branche par phase à partir de la Phase 3, fusion vers `main` après CI verte et relecture du diff. Les phases 0, 1 et 2 sont réalisées directement sur `main`.
 - Avant tout commit : `npm run format:check`, `npm run lint`, `npm test`, `npm run build`.
 - Pas de `git push` par l'assistant sans accord.
 - À chaque étape : fichiers modifiés, commandes, tests, décisions restantes.
 
 ## 6. Phases
 
-| Phase | Contenu                                                         | Statut                                                                                                                                                                                           |
-| ----- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 0     | Initialisation du projet, outillage, CI                         | ✅ (`cb5ccc9`, `265442c`, `b7a56b6`)                                                                                                                                                             |
-| 1     | Schéma de base de données et migrations                         | 🟡 en cours, prioritaire. Fait : migrations `0000` à `0004`, pays chargés sur la base de développement, script de chargement de l'album. Reste : appliquer `0004`, charger l'album, puis valider |
-| 2     | Authentification                                                | 🟡 en cours (`be049e7`, `79be5fb`). Fait : inscription, connexion, sessions, garde `/admin`. Reste : vérification de l'e-mail, script du premier administrateur                                  |
-| 3     | Administration du catalogue (albums, sections, stickers, pays)  | ⬜                                                                                                                                                                                               |
-| 4     | Import du catalogue (CSV/Excel, aperçu, approbation)            | ⬜                                                                                                                                                                                               |
-| 5     | Collection personnelle et statistiques de progression           | ⬜                                                                                                                                                                                               |
-| 6     | Gestion du compte : suppression avec délai de grâce de 30 jours | ⬜                                                                                                                                                                                               |
+| Phase | Contenu                                                         | Statut                                                                                                                                                                                                                                                                          |
+| ----- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0     | Initialisation du projet, outillage, CI                         | ✅ (`cb5ccc9`, `265442c`, `b7a56b6`)                                                                                                                                                                                                                                            |
+| 1     | Schéma de base de données et migrations                         | ✅ (`802bd7a`, `373d806`, `7066cb4`). Migrations `0000` à `0004` appliquées, 48 pays et album CdM 2026 (50 sections, 980 stickers) chargés sur la base de développement                                                                                                         |
+| 2     | Authentification                                                | 🟡 en cours (`be049e7`, `79be5fb`). Fait : inscription, connexion, sessions, garde `/admin`, vérification de l'e-mail (Resend), activée seulement si l'envoi est configuré. Reste : tester l'envoi réel en développement ; en production, domaine d'envoi puis variables Vercel |
+| 3     | Administration du catalogue (albums, sections, stickers, pays)  | ⬜                                                                                                                                                                                                                                                                              |
+| 4     | Import du catalogue (CSV/Excel, aperçu, approbation)            | ⬜                                                                                                                                                                                                                                                                              |
+| 5     | Collection personnelle et statistiques de progression           | ⬜                                                                                                                                                                                                                                                                              |
+| 6     | Gestion du compte : suppression avec délai de grâce de 30 jours | ⬜                                                                                                                                                                                                                                                                              |
 
 ## 7. Décisions de la Phase 1
 
@@ -97,16 +96,20 @@ Dernière mise à jour : 2026-11-01 (état des lieux du dépôt au commit `b7a56
 
 ## 8. Décisions de la Phase 2
 
-| Question                                 | Décision                                      | Statut |
-| ---------------------------------------- | --------------------------------------------- | ------ |
-| Vérification de l'e-mail à l'inscription | Oui                                           | ✅     |
-| Service d'envoi d'e-mails                | Resend                                        | ✅     |
-| Création du premier administrateur       | Script en ligne de commande (pas d'interface) | ✅     |
-| Séparation des branches Neon dev / prod  | En place (confirmé le 2026-11-01)             | ✅     |
+| Question                                 | Décision                                                                                                                                                                                                                       | Statut |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| Vérification de l'e-mail à l'inscription | Oui : connexion refusée tant que l'adresse n'est pas vérifiée, lien valable 1 heure, bouton « Renvoyer » sur `/connexion`                                                                                                      | ✅     |
+| Après le clic sur le lien                | Retour vers `/connexion` (pas de connexion automatique)                                                                                                                                                                        | ✅     |
+| Service d'envoi d'e-mails                | Resend, via son API REST (`src/email/envoyer.ts`, sans dépendance) ; variables `RESEND_API_KEY` et `EMAIL_EXPEDITEUR`                                                                                                          | ✅     |
+| Expéditeur                               | Développement : `onboarding@resend.dev`, envois limités à l'adresse du titulaire du compte Resend. Production : pas de domaine pour l'instant, donc vérification désactivée ; domaine vérifié sur Resend requis pour l'activer | 🟡     |
+| Création du premier administrateur       | Sans objet : un compte administrateur existe déjà                                                                                                                                                                              | ✅     |
+| Comptes créés avant la vérification      | Marqués comme vérifiés (`email_verifie = true`)                                                                                                                                                                                | ✅     |
+| Séparation des branches Neon dev / prod  | En place (confirmé le 2026-11-01)                                                                                                                                                                                              | ✅     |
 
 ## 9. Points de vigilance
 
-- Base de développement : migrations `0000` à `0002` appliquées, empreintes identiques aux fichiers du dépôt (vérifié le 2026-11-01 via `drizzle.__drizzle_migrations`). `0003` appliquée et 48 pays chargés (sortie de `npm run db:pays`). `0004` en attente.
+- Base de développement : migrations `0000` à `0002` appliquées, empreintes identiques aux fichiers du dépôt (vérifié le 2026-11-01 via `drizzle.__drizzle_migrations`). `0003` et `0004` appliquées, 48 pays et album chargés (sorties de `npm run db:pays` et `npm run db:album-cdm2026`).
 - Le CSV ne doit plus être rouvert dans Excel : il a transformé `MAR1` en `mars-01` (corrigé le 2026-11-01). Le script refuse désormais ce type d'erreur.
 - Base de production : migrations appliquées non vérifiées.
-- Les phases 0 et 1 étant poussées sur `main`, ne pas appliquer de migration tant que la base visée par `DATABASE_URL` n'est pas vérifiée.
+- Vérification de l'e-mail active uniquement si `RESEND_API_KEY` et `EMAIL_EXPEDITEUR` sont définies (`envoiEmailConfigure`). Sans elles (production actuelle, faute de domaine), l'inscription connecte directement l'utilisateur sans vérification. Ne définir ces variables sur Vercel qu'avec un domaine d'envoi vérifié sur Resend.
+- Les phases 0 à 2 étant poussées sur `main`, ne pas appliquer de migration tant que la base visée par `DATABASE_URL` n'est pas vérifiée.

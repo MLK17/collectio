@@ -9,6 +9,7 @@ export default function PageInscription() {
   const router = useRouter();
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
+  const [emailEnvoye, setEmailEnvoye] = useState<string | null>(null);
 
   async function soumettre(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,24 +29,39 @@ export default function PageInscription() {
     }
 
     setEnCours(true);
-    const { error } = await authClient.signUp.email({
+    const { data, error } = await authClient.signUp.email({
       name: pseudo,
       email,
       password: motDePasse,
+      callbackURL: "/connexion?verifie=1",
     });
     setEnCours(false);
 
     if (error) {
-      setErreur(
-        error.code === "USER_ALREADY_EXISTS" ||
-          error.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL"
-          ? "Cette adresse e-mail est déjà utilisée."
-          : "Inscription impossible. Vérifie les informations saisies.",
-      );
+      setErreur("Inscription impossible. Vérifie les informations saisies.");
       return;
     }
-    router.push("/");
-    router.refresh();
+    if (data?.token) {
+      router.push("/");
+      router.refresh();
+      return;
+    }
+    setEmailEnvoye(email);
+  }
+
+  if (emailEnvoye) {
+    return (
+      <main style={{ maxWidth: 380, margin: "4rem auto", padding: "0 1rem" }}>
+        <h1>Vérifie ta boîte mail</h1>
+        <p>
+          Un lien de confirmation a été envoyé à <strong>{emailEnvoye}</strong>.
+          Il est valable 1 heure.
+        </p>
+        <p>
+          <Link href="/connexion">Aller à la connexion</Link>
+        </p>
+      </main>
+    );
   }
 
   return (
