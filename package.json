@@ -12,7 +12,9 @@
     "format:check": "prettier --check .",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:pays": "tsx scripts/charger-pays.ts",
+    "db:album-cdm2026": "tsx scripts/charger-album-cdm2026.ts"
   },
   "engines": {
     "node": ">=22.12.0"

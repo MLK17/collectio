@@ -29,6 +29,9 @@ export const utilisateurs = pgTable("utilisateurs", {
   pseudo: text("pseudo").notNull(),
   image: text("image"),
   role: roleUtilisateur("role").notNull().default("utilisateur"),
+  suppressionDemandeeLe: timestamp("suppression_demandee_le", {
+    withTimezone: true,
+  }),
   creeLe: timestamp("cree_le", { withTimezone: true }).notNull().defaultNow(),
   modifieLe: timestamp("modifie_le", { withTimezone: true })
     .notNull()
@@ -97,6 +100,15 @@ export const verifications = pgTable("verifications", {
 
 export const statutAlbum = pgEnum("statut_album", ["brouillon", "publie"]);
 
+export const pays = pgTable("pays", {
+  code: text("code").primaryKey(),
+  nomFr: text("nom_fr").notNull(),
+  relu: boolean("relu").notNull().default(false),
+  modifieLe: timestamp("modifie_le", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const albums = pgTable("albums", {
   id: uuid("id").primaryKey().defaultRandom(),
   nom: text("nom").notNull(),
@@ -119,9 +131,15 @@ export const sections = pgTable(
       .references(() => albums.id, { onDelete: "cascade" }),
     code: text("code").notNull(),
     nom: text("nom").notNull(),
+    paysCode: text("pays_code").references(() => pays.code, {
+      onDelete: "restrict",
+    }),
     ordre: integer("ordre").notNull().default(0),
   },
-  (t) => [uniqueIndex("sections_album_code_uniq").on(t.albumId, t.code)],
+  (t) => [
+    uniqueIndex("sections_album_code_uniq").on(t.albumId, t.code),
+    index("sections_pays_idx").on(t.paysCode),
+  ],
 );
 
 export const stickers = pgTable(
@@ -134,13 +152,17 @@ export const stickers = pgTable(
     sectionId: uuid("section_id")
       .notNull()
       .references(() => sections.id, { onDelete: "restrict" }),
+    numero: text("numero").notNull(),
     code: text("code").notNull(),
     libelle: text("libelle"),
     type: text("type").notNull().default("normal"),
     ordre: integer("ordre").notNull().default(0),
+    imageRef: text("image_ref"),
+    archiveLe: timestamp("archive_le", { withTimezone: true }),
   },
   (t) => [
     uniqueIndex("stickers_album_code_uniq").on(t.albumId, t.code),
+    uniqueIndex("stickers_section_numero_uniq").on(t.sectionId, t.numero),
     index("stickers_section_idx").on(t.sectionId),
   ],
 );

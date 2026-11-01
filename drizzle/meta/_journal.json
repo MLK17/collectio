@@ -22,6 +22,20 @@
       "when": 1793536779700,
       "tag": "0002_modele_album_collections",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793556311347,
+      "tag": "0003_phase1_pays_archivage",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793558896359,
+      "tag": "0004_stickers_numero",
+      "breakpoints": true
     }
   ]
 }
