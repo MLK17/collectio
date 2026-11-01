@@ -24,13 +24,6 @@ function entierPositif(valeur: string, defaut: number): number | null {
   return /^\d+$/.test(valeur) ? Number(valeur) : null;
 }
 
-export function validerPays(champs: Champs) {
-  const nomFr = lire(champs, "nomFr");
-  if (!nomFr) return echec("Le nom français est obligatoire.");
-  if (nomFr.length > 100) return echec("Le nom français est trop long.");
-  return ok({ nomFr, relu: champs.relu === "on" });
-}
-
 export function validerAlbum(champs: Champs) {
   const nom = lire(champs, "nom");
   if (!nom) return echec("Le nom de l'album est obligatoire.");

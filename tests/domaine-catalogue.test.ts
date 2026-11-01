@@ -4,26 +4,9 @@ import {
   codeSticker,
   estUuid,
   validerAlbum,
-  validerPays,
   validerSection,
   validerSticker,
 } from "@/domain/catalogue";
-
-describe("validerPays", () => {
-  it("accepte un nom et lit la case « relu »", () => {
-    expect(validerPays({ nomFr: " France ", relu: "on" })).toEqual({
-      ok: true,
-      valeur: { nomFr: "France", relu: true },
-    });
-    expect(validerPays({ nomFr: "France" })).toMatchObject({
-      valeur: { relu: false },
-    });
-  });
-
-  it("refuse un nom vide", () => {
-    expect(validerPays({ nomFr: "  " }).ok).toBe(false);
-  });
-});
 
 describe("validerAlbum", () => {
   it("accepte un album minimal", () => {

@@ -9,7 +9,6 @@ import {
   albums,
   collectionStickers,
   collections,
-  pays,
   sections,
   stickers,
 } from "@/db/schema";
@@ -18,7 +17,6 @@ import {
   codeSticker,
   estUuid,
   validerAlbum,
-  validerPays,
   validerSection,
   validerSticker,
 } from "@/domain/catalogue";
@@ -57,24 +55,6 @@ async function albumBrouillonSansCollection(albumId: string) {
   return n > 0
     ? "Suppression impossible : l'album a des collectionneurs."
     : null;
-}
-
-/* Pays */
-
-export async function modifierPays(
-  code: string,
-  _etat: EtatFormulaire,
-  formData: FormData,
-): Promise<EtatFormulaire> {
-  await exigerAdministrateur();
-  const r = validerPays(champsDe(formData));
-  if (!r.ok) return { erreur: r.erreur };
-  await db
-    .update(pays)
-    .set({ ...r.valeur, modifieLe: new Date() })
-    .where(eq(pays.code, code));
-  rafraichir();
-  return { ok: true };
 }
 
 /* Albums */
