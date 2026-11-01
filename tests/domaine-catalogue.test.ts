@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   champsDe,
-  codeSticker,
+  codeAffiche,
+  comparerNumeros,
   estUuid,
   validerAlbum,
   validerSection,
@@ -17,8 +18,16 @@ describe("validerAlbum", () => {
         editeur: null,
         description: null,
         annee: null,
+        typeElement: "sticker",
       },
     });
+  });
+
+  it("accepte « carte » et refuse un type d'élément inconnu", () => {
+    expect(validerAlbum({ nom: "A", typeElement: "carte" })).toMatchObject({
+      valeur: { typeElement: "carte" },
+    });
+    expect(validerAlbum({ nom: "A", typeElement: "jeton" }).ok).toBe(false);
   });
 
   it("refuse un nom vide ou une année invalide", () => {
@@ -63,7 +72,7 @@ describe("validerSticker", () => {
     }
     expect(validerSticker({ numero: "1", type: "Holo" })).toEqual({
       ok: true,
-      valeur: { numero: "1", type: "holo", ordre: 0, libelle: null },
+      valeur: { numero: "1", type: "holo", libelle: null },
     });
   });
 
@@ -75,9 +84,18 @@ describe("validerSticker", () => {
 });
 
 describe("utilitaires", () => {
-  it("calcule le code d'un sticker", () => {
-    expect(codeSticker("FRA", "1")).toBe("FRA1");
-    expect(codeSticker("PANINI", "00")).toBe("PANINI00");
+  it("calcule le code affiché d'un sticker", () => {
+    expect(codeAffiche("FRA", "1")).toBe("FRA1");
+    expect(codeAffiche("PANINI", "00")).toBe("PANINI00");
+  });
+
+  it("trie les numéros dans l'ordre naturel", () => {
+    expect(["10", "2", "1", "00"].sort(comparerNumeros)).toEqual([
+      "00",
+      "1",
+      "2",
+      "10",
+    ]);
   });
 
   it("reconnaît un UUID", () => {

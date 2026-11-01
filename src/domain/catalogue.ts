@@ -36,11 +36,16 @@ export function validerAlbum(champs: Champs) {
   ) {
     return echec("L'année doit être comprise entre 1900 et 2100.");
   }
+  const typeElement = lire(champs, "typeElement") || "sticker";
+  if (typeElement !== "sticker" && typeElement !== "carte") {
+    return echec("Le type d'élément doit être « sticker » ou « carte ».");
+  }
   return ok({
     nom,
     editeur: lire(champs, "editeur") || null,
     description: lire(champs, "description") || null,
     annee,
+    typeElement: typeElement as "sticker" | "carte",
   });
 }
 
@@ -73,10 +78,14 @@ export function validerSticker(champs: Champs) {
   if (!/^[a-z0-9_-]{1,30}$/.test(type)) {
     return echec("Le type ne doit contenir que des lettres, chiffres, - ou _.");
   }
-  const ordre = entierPositif(lire(champs, "ordre"), 0);
-  if (ordre === null) return echec("L'ordre doit être un entier positif.");
-  return ok({ numero, type, ordre, libelle: lire(champs, "libelle") || null });
+  return ok({ numero, type, libelle: lire(champs, "libelle") || null });
 }
 
-export const codeSticker = (codeSection: string, numero: string) =>
+/** Code affiché d'un sticker : code de section + numéro (ex. FRA1). */
+export const codeAffiche = (codeSection: string, numero: string) =>
   `${codeSection}${numero}`;
+
+/** Tri naturel des numéros : 2 avant 10, puis ordre alphabétique. */
+export function comparerNumeros(a: string, b: string) {
+  return a.localeCompare(b, "fr", { numeric: true });
+}

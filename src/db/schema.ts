@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   pgTable,
   pgEnum,
+  pgView,
   uuid,
   text,
   integer,
@@ -99,8 +100,9 @@ export const verifications = pgTable("verifications", {
 /* ------------------------------------------------------------------ */
 
 export const statutAlbum = pgEnum("statut_album", ["brouillon", "publie"]);
+export const typeElement = pgEnum("type_element", ["sticker", "carte"]);
 
-export const pays = pgTable("pays", {
+export const paysCdm2026Panini = pgTable("pays_cdm2026_panini", {
   code: text("code").primaryKey(),
   nomFr: text("nom_fr").notNull(),
   modifieLe: timestamp("modifie_le", { withTimezone: true })
@@ -115,6 +117,7 @@ export const albums = pgTable("albums", {
   editeur: text("editeur"),
   annee: integer("annee"),
   statut: statutAlbum("statut").notNull().default("brouillon"),
+  typeElement: typeElement("type_element").notNull().default("sticker"),
   creeLe: timestamp("cree_le", { withTimezone: true }).notNull().defaultNow(),
   modifieLe: timestamp("modifie_le", { withTimezone: true })
     .notNull()
@@ -130,7 +133,7 @@ export const sections = pgTable(
       .references(() => albums.id, { onDelete: "cascade" }),
     code: text("code").notNull(),
     nom: text("nom").notNull(),
-    paysCode: text("pays_code").references(() => pays.code, {
+    paysCode: text("pays_code").references(() => paysCdm2026Panini.code, {
       onDelete: "restrict",
     }),
     ordre: integer("ordre").notNull().default(0),
@@ -155,16 +158,47 @@ export const stickers = pgTable(
     code: text("code").notNull(),
     libelle: text("libelle"),
     type: text("type").notNull().default("normal"),
-    ordre: integer("ordre").notNull().default(0),
     imageRef: text("image_ref"),
     archiveLe: timestamp("archive_le", { withTimezone: true }),
   },
   (t) => [
-    uniqueIndex("stickers_album_code_uniq").on(t.albumId, t.code),
     uniqueIndex("stickers_section_numero_uniq").on(t.sectionId, t.numero),
     index("stickers_section_idx").on(t.sectionId),
   ],
 );
+
+export const vueStickers = pgView("vue_stickers", {
+  stickerId: uuid("sticker_id"),
+  albumId: uuid("album_id"),
+  album: text("album"),
+  editeur: text("editeur"),
+  typeElement: typeElement("type_element"),
+  section: text("section"),
+  pays: text("pays"),
+  numero: text("numero"),
+  codeAffiche: text("code_affiche"),
+  type: text("type"),
+  libelle: text("libelle"),
+  archive: boolean("archive"),
+}).as(sql`
+  select
+    s.id as sticker_id,
+    a.id as album_id,
+    a.nom as album,
+    a.editeur,
+    a.type_element,
+    sec.code as section,
+    p.nom_fr as pays,
+    s.numero,
+    sec.code || s.numero as code_affiche,
+    s.type,
+    s.libelle,
+    s.archive_le is not null as archive
+  from stickers s
+  join albums a on a.id = s.album_id
+  join sections sec on sec.id = s.section_id
+  left join pays_cdm2026_panini p on p.code = sec.pays_code
+`);
 
 /* ------------------------------------------------------------------ */
 /* Collections personnelles                                            */

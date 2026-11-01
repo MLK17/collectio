@@ -43,6 +43,20 @@
       "when": 1793567964754,
       "tag": "0005_suppression_pays_relu",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793569594788,
+      "tag": "0006_renommage_pays_cdm2026_panini",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793570386815,
+      "tag": "0007_stickers_code_section_type_element_vue",
+      "breakpoints": true
     }
   ]
 }

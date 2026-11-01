@@ -14,7 +14,6 @@ import {
 } from "@/db/schema";
 import {
   champsDe,
-  codeSticker,
   estUuid,
   validerAlbum,
   validerSection,
@@ -23,8 +22,7 @@ import {
 import type { EtatFormulaire } from "@/components/FormulaireAdmin";
 
 const DOUBLON_SECTION = "Ce code de section existe déjà dans l'album.";
-const DOUBLON_STICKER =
-  "Ce numéro existe déjà dans la section, ou ce code dans l'album.";
+const DOUBLON_STICKER = "Ce numéro existe déjà dans la section.";
 
 function estDoublon(erreur: unknown) {
   const e = erreur as { code?: string; cause?: { code?: string } };
@@ -158,7 +156,7 @@ export async function modifierSection(
         .where(and(eq(sections.id, sectionId), eq(sections.albumId, albumId))),
       db
         .update(stickers)
-        .set({ code: sql`${r.valeur.code}::text || ${stickers.numero}` })
+        .set({ code: r.valeur.code })
         .where(eq(stickers.sectionId, sectionId)),
     ]);
   } catch (e) {
@@ -224,7 +222,7 @@ export async function creerSticker(
       ...r.valeur,
       albumId,
       sectionId,
-      code: codeSticker(codeSection, r.valeur.numero),
+      code: codeSection,
     });
   } catch (e) {
     if (estDoublon(e)) return { erreur: DOUBLON_STICKER };
@@ -250,7 +248,7 @@ export async function modifierSticker(
   try {
     await db
       .update(stickers)
-      .set({ ...r.valeur, code: codeSticker(codeSection, r.valeur.numero) })
+      .set({ ...r.valeur, code: codeSection })
       .where(
         and(eq(stickers.id, stickerId), eq(stickers.sectionId, sectionId)),
       );

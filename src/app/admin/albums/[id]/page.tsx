@@ -3,9 +3,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { asc, count, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { albums, pays, sections, stickers } from "@/db/schema";
+import {
+  albums,
+  paysCdm2026Panini as pays,
+  sections,
+  stickers,
+} from "@/db/schema";
 import { estUuid } from "@/domain/catalogue";
 import FormulaireAdmin from "@/components/FormulaireAdmin";
+import ChoixTypeElement, {
+  LIBELLES_TYPE_ELEMENT,
+} from "@/components/ChoixTypeElement";
 import {
   changerStatutAlbum,
   creerSection,
@@ -103,6 +111,7 @@ async function ContenuAlbum({ params }: Props) {
       .orderBy(asc(pays.nomFr)),
   ]);
   const brouillon = album.statut === "brouillon";
+  const elements = LIBELLES_TYPE_ELEMENT[album.typeElement].toLowerCase();
 
   return (
     <main>
@@ -135,6 +144,7 @@ async function ContenuAlbum({ params }: Props) {
           defaultValue={album.description ?? ""}
           placeholder="Description"
         />
+        <ChoixTypeElement valeur={album.typeElement} />
       </FormulaireAdmin>
 
       <p>
@@ -153,7 +163,7 @@ async function ContenuAlbum({ params }: Props) {
           <FormulaireAdmin
             action={supprimerAlbum.bind(null, id)}
             libelle="Supprimer l'album"
-            confirmation={`Supprimer définitivement « ${album.nom} », ses sections et ses stickers ?`}
+            confirmation={`Supprimer définitivement « ${album.nom} », ses sections et ses ${elements} ?`}
           />
         )}
       </div>
@@ -172,7 +182,7 @@ async function ContenuAlbum({ params }: Props) {
               <ChampsSection section={s} listePays={listePays} />
             </FormulaireAdmin>
             <Link href={`/admin/albums/${id}/sections/${s.id}`}>
-              {s.nbStickers} stickers →
+              {s.nbStickers} {elements} →
             </Link>
           </div>
         ))}

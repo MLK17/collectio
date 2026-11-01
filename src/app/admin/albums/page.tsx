@@ -4,6 +4,9 @@ import { asc, count, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { albums, stickers } from "@/db/schema";
 import FormulaireAdmin from "@/components/FormulaireAdmin";
+import ChoixTypeElement, {
+  LIBELLES_TYPE_ELEMENT,
+} from "@/components/ChoixTypeElement";
 import { creerAlbum } from "../actions";
 
 export default function PageAlbums() {
@@ -19,9 +22,11 @@ async function ContenuAlbums() {
     .select({
       id: albums.id,
       nom: albums.nom,
+      editeur: albums.editeur,
       annee: albums.annee,
       statut: albums.statut,
-      nbStickers: count(stickers.id),
+      typeElement: albums.typeElement,
+      nbElements: count(stickers.id),
     })
     .from(albums)
     .leftJoin(stickers, eq(stickers.albumId, albums.id))
@@ -34,16 +39,36 @@ async function ContenuAlbums() {
         <Link href="/admin">← Tableau de bord</Link>
       </p>
       <h1>Albums</h1>
-      {liste.length === 0 && <p>Aucun album.</p>}
-      <ul>
-        {liste.map((a) => (
-          <li key={a.id}>
-            <Link href={`/admin/albums/${a.id}`}>{a.nom}</Link>
-            {a.annee && ` (${a.annee})`} : {a.nbStickers} stickers,{" "}
-            {a.statut === "publie" ? "publié" : "brouillon"}
-          </li>
-        ))}
-      </ul>
+      {liste.length === 0 ? (
+        <p>Aucun album.</p>
+      ) : (
+        <table cellPadding={6}>
+          <thead>
+            <tr>
+              <th align="left">Nom</th>
+              <th align="left">Éditeur</th>
+              <th align="left">Année</th>
+              <th align="left">Type</th>
+              <th align="right">Nombre</th>
+              <th align="left">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {liste.map((a) => (
+              <tr key={a.id}>
+                <td>
+                  <Link href={`/admin/albums/${a.id}`}>{a.nom}</Link>
+                </td>
+                <td>{a.editeur}</td>
+                <td>{a.annee}</td>
+                <td>{LIBELLES_TYPE_ELEMENT[a.typeElement]}</td>
+                <td align="right">{a.nbElements}</td>
+                <td>{a.statut === "publie" ? "publié" : "brouillon"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
 
       <h2>Nouvel album</h2>
       <FormulaireAdmin action={creerAlbum} libelle="Créer l'album">
@@ -57,6 +82,7 @@ async function ContenuAlbums() {
           placeholder="Année"
         />
         <input name="description" placeholder="Description" />
+        <ChoixTypeElement />
       </FormulaireAdmin>
     </main>
   );

@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { pays } from "../src/db/schema";
+import { paysCdm2026Panini as pays } from "../src/db/schema";
 
 dotenv.config({ path: ".env.local" });
 

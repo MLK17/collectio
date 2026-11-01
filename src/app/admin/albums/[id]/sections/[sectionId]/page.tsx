@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { albums, sections, stickers } from "@/db/schema";
-import { estUuid } from "@/domain/catalogue";
+import { codeAffiche, comparerNumeros, estUuid } from "@/domain/catalogue";
 import FormulaireAdmin from "@/components/FormulaireAdmin";
 import {
   archiverSticker,
@@ -20,7 +20,6 @@ function ChampsSticker({
     numero: string;
     libelle: string | null;
     type: string;
-    ordre: number;
   };
 }) {
   return (
@@ -44,14 +43,6 @@ function ChampsSticker({
         placeholder="Type"
         maxLength={30}
         style={{ width: "6rem" }}
-      />
-      <input
-        name="ordre"
-        type="number"
-        min={0}
-        defaultValue={sticker?.ordre ?? 0}
-        aria-label="Ordre"
-        style={{ width: "4.5rem" }}
       />
     </>
   );
@@ -83,16 +74,18 @@ async function ContenuSection({ params, searchParams }: Props) {
   if (!resultat) notFound();
   const { section, album } = resultat;
 
-  const liste = await db
-    .select()
-    .from(stickers)
-    .where(
-      and(
-        eq(stickers.sectionId, sectionId),
-        avecArchives ? undefined : isNull(stickers.archiveLe),
-      ),
-    )
-    .orderBy(asc(stickers.ordre), asc(stickers.numero));
+  const liste = (
+    await db
+      .select()
+      .from(stickers)
+      .where(
+        and(
+          eq(stickers.sectionId, sectionId),
+          avecArchives ? undefined : isNull(stickers.archiveLe),
+        ),
+      )
+  ).sort((a, b) => comparerNumeros(a.numero, b.numero));
+  const elements = album.typeElement === "carte" ? "cartes" : "stickers";
 
   return (
     <main>
@@ -105,16 +98,18 @@ async function ContenuSection({ params, searchParams }: Props) {
       <p>
         {avecArchives ? (
           <Link href={`/admin/albums/${id}/sections/${sectionId}`}>
-            Masquer les stickers archivés
+            Masquer les {elements} archivés
           </Link>
         ) : (
           <Link href={`/admin/albums/${id}/sections/${sectionId}?archives=1`}>
-            Afficher aussi les stickers archivés
+            Afficher aussi les {elements} archivés
           </Link>
         )}
       </p>
 
-      <h2>Stickers ({liste.length})</h2>
+      <h2>
+        {elements === "cartes" ? "Cartes" : "Stickers"} ({liste.length})
+      </h2>
       <div style={{ display: "grid", gap: "0.5rem" }}>
         {liste.map((s) => (
           <div
@@ -126,7 +121,9 @@ async function ContenuSection({ params, searchParams }: Props) {
               opacity: s.archiveLe ? 0.5 : 1,
             }}
           >
-            <code style={{ width: "6rem" }}>{s.code}</code>
+            <code style={{ width: "6rem" }}>
+              {codeAffiche(section.code, s.numero)}
+            </code>
             <FormulaireAdmin
               action={modifierSticker.bind(null, id, sectionId, s.id)}
               libelle="Enregistrer"
@@ -141,8 +138,10 @@ async function ContenuSection({ params, searchParams }: Props) {
         ))}
       </div>
 
-      <h3>Nouveau sticker</h3>
-      <p>Le code est calculé automatiquement : {section.code} + numéro.</p>
+      <h3>Ajouter {elements === "cartes" ? "une carte" : "un sticker"}</h3>
+      <p>
+        Code affiché : {section.code} + numéro (ex. {section.code}1).
+      </p>
       <FormulaireAdmin
         action={creerSticker.bind(null, id, sectionId)}
         libelle="Ajouter"
@@ -156,7 +155,7 @@ async function ContenuSection({ params, searchParams }: Props) {
           <FormulaireAdmin
             action={supprimerSection.bind(null, id, sectionId)}
             libelle="Supprimer la section"
-            confirmation={`Supprimer définitivement la section ${section.code} et ses stickers ?`}
+            confirmation={`Supprimer définitivement la section ${section.code} et ses ${elements} ?`}
           />
         </>
       )}
