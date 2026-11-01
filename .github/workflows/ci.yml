@@ -8,6 +8,13 @@ on:
 jobs:
   verifier:
     runs-on: ubuntu-latest
+    env:
+      # Valeurs factices : la CI ne se connecte jamais à une vraie base.
+      # Elles servent uniquement à satisfaire la lecture des variables
+      # d'environnement pendant le build et les tests.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      BETTER_AUTH_SECRET: secret-factice-uniquement-pour-la-ci-0123456789
+      BETTER_AUTH_URL: http://localhost:3000
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
