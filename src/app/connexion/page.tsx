@@ -60,7 +60,9 @@ export default function PageConnexion() {
         </button>
       </form>
       <p>
-        Pas encore de compte ? <Link href="/inscription">{"S\u0027inscrire"}</Link>      </p>
+        Pas encore de compte ?{" "}
+        <Link href="/inscription">{"S\u0027inscrire"}</Link>{" "}
+      </p>
     </main>
   );
 }
