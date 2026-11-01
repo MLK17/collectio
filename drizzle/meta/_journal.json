@@ -15,6 +15,13 @@
       "when": 1793480067364,
       "tag": "0001_auth_better_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793536779700,
+      "tag": "0002_modele_album_collections",
+      "breakpoints": true
     }
   ]
 }

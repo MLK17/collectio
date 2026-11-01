@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   pgEnum,
@@ -8,7 +9,13 @@ import {
   timestamp,
   uniqueIndex,
   index,
+  primaryKey,
+  check,
 } from "drizzle-orm/pg-core";
+
+/* ------------------------------------------------------------------ */
+/* Authentification (Better Auth)                                      */
+/* ------------------------------------------------------------------ */
 
 export const roleUtilisateur = pgEnum("role_utilisateur", [
   "utilisateur",
@@ -84,12 +91,23 @@ export const verifications = pgTable("verifications", {
     .defaultNow(),
 });
 
+/* ------------------------------------------------------------------ */
+/* Albums et stickers                                                  */
+/* ------------------------------------------------------------------ */
+
+export const statutAlbum = pgEnum("statut_album", ["brouillon", "publie"]);
+
 export const albums = pgTable("albums", {
   id: uuid("id").primaryKey().defaultRandom(),
   nom: text("nom").notNull(),
   description: text("description"),
-  publie: boolean("publie").notNull().default(false),
+  editeur: text("editeur"),
+  annee: integer("annee"),
+  statut: statutAlbum("statut").notNull().default("brouillon"),
   creeLe: timestamp("cree_le", { withTimezone: true }).notNull().defaultNow(),
+  modifieLe: timestamp("modifie_le", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const sections = pgTable(
@@ -99,10 +117,11 @@ export const sections = pgTable(
     albumId: uuid("album_id")
       .notNull()
       .references(() => albums.id, { onDelete: "cascade" }),
+    code: text("code").notNull(),
     nom: text("nom").notNull(),
     ordre: integer("ordre").notNull().default(0),
   },
-  (t) => [index("sections_album_idx").on(t.albumId)],
+  (t) => [uniqueIndex("sections_album_code_uniq").on(t.albumId, t.code)],
 );
 
 export const stickers = pgTable(
@@ -112,18 +131,23 @@ export const stickers = pgTable(
     albumId: uuid("album_id")
       .notNull()
       .references(() => albums.id, { onDelete: "cascade" }),
-    sectionId: uuid("section_id").references(() => sections.id, {
-      onDelete: "set null",
-    }),
-    numero: text("numero").notNull(),
-    nom: text("nom"),
+    sectionId: uuid("section_id")
+      .notNull()
+      .references(() => sections.id, { onDelete: "restrict" }),
+    code: text("code").notNull(),
+    libelle: text("libelle"),
+    type: text("type").notNull().default("normal"),
     ordre: integer("ordre").notNull().default(0),
   },
   (t) => [
-    uniqueIndex("stickers_album_numero_uniq").on(t.albumId, t.numero),
+    uniqueIndex("stickers_album_code_uniq").on(t.albumId, t.code),
     index("stickers_section_idx").on(t.sectionId),
   ],
 );
+
+/* ------------------------------------------------------------------ */
+/* Collections personnelles                                            */
+/* ------------------------------------------------------------------ */
 
 export const collections = pgTable(
   "collections",
@@ -134,7 +158,7 @@ export const collections = pgTable(
       .references(() => utilisateurs.id, { onDelete: "cascade" }),
     albumId: uuid("album_id")
       .notNull()
-      .references(() => albums.id, { onDelete: "cascade" }),
+      .references(() => albums.id, { onDelete: "restrict" }),
     creeLe: timestamp("cree_le", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -142,6 +166,7 @@ export const collections = pgTable(
       t.utilisateurId,
       t.albumId,
     ),
+    index("collections_album_idx").on(t.albumId),
   ],
 );
 
@@ -153,13 +178,15 @@ export const collectionStickers = pgTable(
       .references(() => collections.id, { onDelete: "cascade" }),
     stickerId: uuid("sticker_id")
       .notNull()
-      .references(() => stickers.id, { onDelete: "cascade" }),
-    quantite: integer("quantite").notNull().default(0),
+      .references(() => stickers.id, { onDelete: "restrict" }),
+    quantite: integer("quantite").notNull().default(1),
     modifieLe: timestamp("modifie_le", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
   (t) => [
-    uniqueIndex("collection_stickers_uniq").on(t.collectionId, t.stickerId),
+    primaryKey({ columns: [t.collectionId, t.stickerId] }),
+    check("collection_stickers_quantite_check", sql`${t.quantite} >= 1`),
+    index("collection_stickers_sticker_idx").on(t.stickerId),
   ],
 );
