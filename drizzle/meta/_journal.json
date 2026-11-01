@@ -36,6 +36,13 @@
       "when": 1793558896359,
       "tag": "0004_stickers_numero",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793567964754,
+      "tag": "0005_suppression_pays_relu",
+      "breakpoints": true
     }
   ]
 }

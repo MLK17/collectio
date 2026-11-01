@@ -103,7 +103,6 @@ export const statutAlbum = pgEnum("statut_album", ["brouillon", "publie"]);
 export const pays = pgTable("pays", {
   code: text("code").primaryKey(),
   nomFr: text("nom_fr").notNull(),
-  relu: boolean("relu").notNull().default(false),
   modifieLe: timestamp("modifie_le", { withTimezone: true })
     .notNull()
     .defaultNow(),
