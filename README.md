@@ -21,11 +21,11 @@ Premier album : Panini Coupe du monde 2026.
 ## Structure
 
 - src/app : pages utilisateur
-- src/app/admin : administration
-- src/domain : règles métier
+- src/app/admin : administration du catalogue (Phase 3)
+- src/domain : règles métier (collection et statistiques : Phase 5)
 - src/db : schéma et migrations (Phase 1)
-- src/auth : authentification (Phase 3)
-- src/import : import du catalogue (Phase 2)
+- src/auth : authentification (Phase 2)
+- src/import : import du catalogue (Phase 4)
 - tests : tests
 - docs : décisions et documentation
 
