@@ -143,6 +143,6 @@ Dernière mise à jour : 2026-11-01 (état des lieux du dépôt au commit `b7a56
 
 - Base de développement : migrations `0000` à `0002` appliquées, empreintes identiques aux fichiers du dépôt (vérifié le 2026-11-01 via `drizzle.__drizzle_migrations`). `0003` et `0004` appliquées, 48 pays et album chargés (sorties de `npm run db:pays` et `npm run db:album-cdm2026`).
 - Le CSV ne doit plus être rouvert dans Excel : il a transformé `MAR1` en `mars-01` (corrigé le 2026-11-01). Le script refuse désormais ce type d'erreur.
-- Base de production : migrations appliquées non vérifiées.
+- Base de production : migrations appliquées non vérifiées. Mise en production (base + Vercel) reportée volontairement (2026-11-01) : priorité au développement sur la branche Neon `dev` (`.env.local` vérifié). Tant que ce n'est pas fait, le code de `main` peut ne plus correspondre au schéma de production. Pistes notées : migrations au déploiement via `vercel.json`, pays insérés par une migration de données.
 - Vérification de l'e-mail active uniquement si `RESEND_API_KEY` et `EMAIL_EXPEDITEUR` sont définies (`envoiEmailConfigure`). Sans elles (production actuelle, faute de domaine), l'inscription connecte directement l'utilisateur sans vérification. Ne définir ces variables sur Vercel qu'avec un domaine d'envoi vérifié sur Resend.
 - Les phases 0 à 2 étant poussées sur `main`, ne pas appliquer de migration tant que la base visée par `DATABASE_URL` n'est pas vérifiée.
