@@ -3,7 +3,12 @@ import dotenv from "dotenv";
 import { neon } from "@neondatabase/serverless";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
-import { albums, pays, sections, stickers } from "../src/db/schema";
+import {
+  albums,
+  paysCdm2026Panini as pays,
+  sections,
+  stickers,
+} from "../src/db/schema";
 import { decoderCsv, lireCatalogue } from "../src/import/catalogue";
 
 dotenv.config({ path: ".env.local" });
@@ -45,7 +50,7 @@ async function main() {
   );
   if (inconnus.length > 0) {
     throw new Error(
-      `Pays absents de la table pays (lancer npm run db:pays) : ${inconnus.join(", ")}`,
+      `Pays absents de la table pays_cdm2026_panini (lancer npm run db:pays) : ${inconnus.join(", ")}`,
     );
   }
 
@@ -87,24 +92,18 @@ async function main() {
     ).map((s) => [s.code, s.id]),
   );
 
-  const positions = new Map<string, number>();
   const stickersAjoutes = await db
     .insert(stickers)
     .values(
-      lignes.map((l) => {
-        const ordre = (positions.get(l.sectionCode) ?? 0) + 1;
-        positions.set(l.sectionCode, ordre);
-        return {
-          albumId: album.id,
-          sectionId: idsSections.get(l.sectionCode)!,
-          numero: l.numero,
-          code: l.code,
-          type: l.type,
-          ordre,
-        };
-      }),
+      lignes.map((l) => ({
+        albumId: album.id,
+        sectionId: idsSections.get(l.sectionCode)!,
+        numero: l.numero,
+        code: l.sectionCode,
+        type: l.type,
+      })),
     )
-    .onConflictDoNothing({ target: [stickers.albumId, stickers.code] })
+    .onConflictDoNothing({ target: [stickers.sectionId, stickers.numero] })
     .returning({ id: stickers.id });
 
   console.log(

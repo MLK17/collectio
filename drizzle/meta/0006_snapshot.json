@@ -1,0 +1,967 @@
+{
+  "id": "7f05ec37-8900-4a64-991c-a839ce721733",
+  "prevId": "3880bd76-9e3a-4b91-8a6e-3585d1fc44c7",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.albums": {
+      "name": "albums",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nom": {
+          "name": "nom",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editeur": {
+          "name": "editeur",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "annee": {
+          "name": "annee",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "statut": {
+          "name": "statut",
+          "type": "statut_album",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'brouillon'"
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.collection_stickers": {
+      "name": "collection_stickers",
+      "schema": "",
+      "columns": {
+        "collection_id": {
+          "name": "collection_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sticker_id": {
+          "name": "sticker_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantite": {
+          "name": "quantite",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "collection_stickers_sticker_idx": {
+          "name": "collection_stickers_sticker_idx",
+          "columns": [
+            {
+              "expression": "sticker_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "collection_stickers_collection_id_collections_id_fk": {
+          "name": "collection_stickers_collection_id_collections_id_fk",
+          "tableFrom": "collection_stickers",
+          "tableTo": "collections",
+          "columnsFrom": [
+            "collection_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "collection_stickers_sticker_id_stickers_id_fk": {
+          "name": "collection_stickers_sticker_id_stickers_id_fk",
+          "tableFrom": "collection_stickers",
+          "tableTo": "stickers",
+          "columnsFrom": [
+            "sticker_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "collection_stickers_collection_id_sticker_id_pk": {
+          "name": "collection_stickers_collection_id_sticker_id_pk",
+          "columns": [
+            "collection_id",
+            "sticker_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "collection_stickers_quantite_check": {
+          "name": "collection_stickers_quantite_check",
+          "value": "\"collection_stickers\".\"quantite\" >= 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.collections": {
+      "name": "collections",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "utilisateur_id": {
+          "name": "utilisateur_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "album_id": {
+          "name": "album_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "collections_utilisateur_album_uniq": {
+          "name": "collections_utilisateur_album_uniq",
+          "columns": [
+            {
+              "expression": "utilisateur_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "album_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "collections_album_idx": {
+          "name": "collections_album_idx",
+          "columns": [
+            {
+              "expression": "album_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "collections_utilisateur_id_utilisateurs_id_fk": {
+          "name": "collections_utilisateur_id_utilisateurs_id_fk",
+          "tableFrom": "collections",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "utilisateur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "collections_album_id_albums_id_fk": {
+          "name": "collections_album_id_albums_id_fk",
+          "tableFrom": "collections",
+          "tableTo": "albums",
+          "columnsFrom": [
+            "album_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.comptes": {
+      "name": "comptes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "utilisateur_id": {
+          "name": "utilisateur_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "compte_id": {
+          "name": "compte_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fournisseur_id": {
+          "name": "fournisseur_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mot_de_passe": {
+          "name": "mot_de_passe",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jeton_acces": {
+          "name": "jeton_acces",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jeton_rafraichissement": {
+          "name": "jeton_rafraichissement",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jeton_id": {
+          "name": "jeton_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "acces_expire_le": {
+          "name": "acces_expire_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rafraichissement_expire_le": {
+          "name": "rafraichissement_expire_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "portee": {
+          "name": "portee",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "comptes_utilisateur_idx": {
+          "name": "comptes_utilisateur_idx",
+          "columns": [
+            {
+              "expression": "utilisateur_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "comptes_utilisateur_id_utilisateurs_id_fk": {
+          "name": "comptes_utilisateur_id_utilisateurs_id_fk",
+          "tableFrom": "comptes",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "utilisateur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pays_cdm2026_panini": {
+      "name": "pays_cdm2026_panini",
+      "schema": "",
+      "columns": {
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nom_fr": {
+          "name": "nom_fr",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sections": {
+      "name": "sections",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "album_id": {
+          "name": "album_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nom": {
+          "name": "nom",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pays_code": {
+          "name": "pays_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ordre": {
+          "name": "ordre",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "sections_album_code_uniq": {
+          "name": "sections_album_code_uniq",
+          "columns": [
+            {
+              "expression": "album_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "sections_pays_idx": {
+          "name": "sections_pays_idx",
+          "columns": [
+            {
+              "expression": "pays_code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sections_album_id_albums_id_fk": {
+          "name": "sections_album_id_albums_id_fk",
+          "tableFrom": "sections",
+          "tableTo": "albums",
+          "columnsFrom": [
+            "album_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "sections_pays_code_pays_cdm2026_panini_code_fk": {
+          "name": "sections_pays_code_pays_cdm2026_panini_code_fk",
+          "tableFrom": "sections",
+          "tableTo": "pays_cdm2026_panini",
+          "columnsFrom": [
+            "pays_code"
+          ],
+          "columnsTo": [
+            "code"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sessions": {
+      "name": "sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "utilisateur_id": {
+          "name": "utilisateur_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jeton": {
+          "name": "jeton",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expire_le": {
+          "name": "expire_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adresse_ip": {
+          "name": "adresse_ip",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "agent_utilisateur": {
+          "name": "agent_utilisateur",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "sessions_utilisateur_idx": {
+          "name": "sessions_utilisateur_idx",
+          "columns": [
+            {
+              "expression": "utilisateur_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sessions_utilisateur_id_utilisateurs_id_fk": {
+          "name": "sessions_utilisateur_id_utilisateurs_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "utilisateurs",
+          "columnsFrom": [
+            "utilisateur_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "sessions_jeton_unique": {
+          "name": "sessions_jeton_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "jeton"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.stickers": {
+      "name": "stickers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "album_id": {
+          "name": "album_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "section_id": {
+          "name": "section_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "numero": {
+          "name": "numero",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "libelle": {
+          "name": "libelle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'normal'"
+        },
+        "ordre": {
+          "name": "ordre",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "image_ref": {
+          "name": "image_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "archive_le": {
+          "name": "archive_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "stickers_album_code_uniq": {
+          "name": "stickers_album_code_uniq",
+          "columns": [
+            {
+              "expression": "album_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "stickers_section_numero_uniq": {
+          "name": "stickers_section_numero_uniq",
+          "columns": [
+            {
+              "expression": "section_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "numero",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "stickers_section_idx": {
+          "name": "stickers_section_idx",
+          "columns": [
+            {
+              "expression": "section_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "stickers_album_id_albums_id_fk": {
+          "name": "stickers_album_id_albums_id_fk",
+          "tableFrom": "stickers",
+          "tableTo": "albums",
+          "columnsFrom": [
+            "album_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "stickers_section_id_sections_id_fk": {
+          "name": "stickers_section_id_sections_id_fk",
+          "tableFrom": "stickers",
+          "tableTo": "sections",
+          "columnsFrom": [
+            "section_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.utilisateurs": {
+      "name": "utilisateurs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_verifie": {
+          "name": "email_verifie",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "pseudo": {
+          "name": "pseudo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "role_utilisateur",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'utilisateur'"
+        },
+        "suppression_demandee_le": {
+          "name": "suppression_demandee_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "utilisateurs_email_unique": {
+          "name": "utilisateurs_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.verifications": {
+      "name": "verifications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "identifiant": {
+          "name": "identifiant",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valeur": {
+          "name": "valeur",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expire_le": {
+          "name": "expire_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cree_le": {
+          "name": "cree_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "modifie_le": {
+          "name": "modifie_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.role_utilisateur": {
+      "name": "role_utilisateur",
+      "schema": "public",
+      "values": [
+        "utilisateur",
+        "administrateur"
+      ]
+    },
+    "public.statut_album": {
+      "name": "statut_album",
+      "schema": "public",
+      "values": [
+        "brouillon",
+        "publie"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

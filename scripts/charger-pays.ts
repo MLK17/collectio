@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { pays } from "../src/db/schema";
+import { paysCdm2026Panini as pays } from "../src/db/schema";
 
 dotenv.config({ path: ".env.local" });
 
-// 48 équipes de la Coupe du monde 2026 (codes FIFA). Noms à relire par un admin.
+// 48 équipes de la Coupe du monde 2026 (codes FIFA).
 const PAYS_CDM_2026: { code: string; nomFr: string }[] = [
   { code: "CAN", nomFr: "Canada" },
   { code: "MEX", nomFr: "Mexique" },
@@ -68,7 +68,7 @@ async function main() {
   // Ne remplace jamais un pays existant : les corrections de l'admin sont conservées.
   const inseres = await db
     .insert(pays)
-    .values(PAYS_CDM_2026.map((p) => ({ ...p, relu: false })))
+    .values(PAYS_CDM_2026)
     .onConflictDoNothing({ target: pays.code })
     .returning({ code: pays.code });
 
